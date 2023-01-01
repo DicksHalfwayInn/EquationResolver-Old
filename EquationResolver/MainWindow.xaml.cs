@@ -60,7 +60,7 @@ namespace EquationResolver
 
                     // Call the method to verify the current text is all legal and show errors if it isn't
                     // TODO:  Currently this doesn't work
-                    vm.VerifyTextChangedDoesntCreateAnError(currentTextInEquationTextbox);
+                    vm.TextboxTextChangedEventMethodInVM(currentTextInEquationTextbox);
                 }
             }
             // If this was the first pass then set the firstPass flag to false

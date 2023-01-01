@@ -102,6 +102,7 @@ namespace EquationResolver
 
         #endregion EndRegion:  Observable Public Properties
 
+
         #region Private helper methods
         /// <summary>
         ///      Helper method to check for mismatched brackets
@@ -396,13 +397,18 @@ namespace EquationResolver
 
         #region Command Methods
 
-
         /// <summary>
         ///      Button Command:  Runs when the Solve Equation button is pressed
         /// </summary>
         [RelayCommand]
         public void SolveEquationButtonPressed()
         {
+            // Reset the Calculations when the Solve Equation button is pressed
+            Calculations = new();
+
+            // Reset the Calculations Counter property back to zero
+            calculationCounter = 0;
+
             // Remove all the spaces from the OriginalString
             trimmedAndDeSpacedOriginalString = OriginalString.Replace(" ", "");
 
@@ -432,6 +438,7 @@ namespace EquationResolver
         }
         #endregion EndRegion: Command Methods
 
+
         #region Public Methods available to the view
 
         /// <summary>
@@ -441,7 +448,7 @@ namespace EquationResolver
         ///                  Text was changing, but the binding doesn't work... fix this
         /// </summary>
         /// <param name="s"></param>
-        public void VerifyTextChangedDoesntCreateAnError(string s)
+        public void TextboxTextChangedEventMethodInVM(string s)
         {
             // Method that changes the flag to display the error... TODO: doesn't work
             _ = VerifyAllCharsInStringAreValidEquationCharacters(s);
@@ -455,6 +462,7 @@ namespace EquationResolver
         }
 
         #endregion EndRegion: Command Methods
+
 
         #region Private methods to Solve the Equation
 
@@ -678,6 +686,6 @@ namespace EquationResolver
             return stringrecieved;
         }
 
-                #endregion EndRegion:  Private methods to Solve the Equation 
+        #endregion EndRegion:  Private methods to Solve the Equation 
     }
 }
