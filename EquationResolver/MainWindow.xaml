@@ -3,64 +3,94 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EquationResolver"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:iac="clr-namespace:Avalonia.Xaml.Interactions.Custom;assembly=Avalonia.Xaml.Interactions"
+        xmlns:local="clr-namespace:EquationResolver" d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
+    <Window.Resources>
+        <!--<valueConverters:BoolToVisibilityInverseConverter x:Key="BoolToVisibilityInverseConverter"></valueConverters:BoolToVisibilityInverseConverter>
+        <valueConverters:BoolToVisibilityConverter x:Key="BoolToVisibility"></valueConverters:BoolToVisibilityConverter>-->
+    </Window.Resources>
+
+    <!-- Main Grid -->
     <Grid >
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
 
+        <!-- The Equation Entry and Solution Grid -->
+        <Grid Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <!-- Row 0: Equation Entry Textbox -->
+                <RowDefinition Height="*" />
+                <!-- Row 1: The Error Message label -->
+                <RowDefinition Height="Auto" />
+                <!-- Row 2: The Result of the Equation -->
+                <RowDefinition Height="*" />
+                <!-- Row 3: Button: Solve Equation Entered -->
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" >
-            <Label 
-               FontSize="20" Content="Progress Report:  "
-               />
-            <Label FontSize="20" Content="{Binding ProgressStatus}" />
-        </StackPanel>
-        
-        <Grid Grid.Column="1" Grid.ColumnSpan="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+            <!-- Equation Entry Textbox-->
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                </Grid.RowDefinitions>
+                <!-- The Header -->
+                <Label Content="Enter your equation:" FontSize="20" Margin="0,0,0,20"/>
 
-                
-
-                <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label Content="Enter your equation:" FontSize="20" Margin="0,0,0,20"/>
-                    <TextBox FontSize="20" Background="AliceBlue"
+                <!-- The Equation Entry Textbox -->
+                <TextBox x:Name="EquationEntry" FontSize="20" Background="AliceBlue"
                      Text="{Binding OriginalString, Mode=TwoWay}"
                      HorizontalContentAlignment="Center"
                      VerticalContentAlignment="Center"
-                     >
+                     TextChanged="EquationEntry_TextChanged">
+                   
+                        
+                    
+                </TextBox>
 
+            </StackPanel>
 
-                    </TextBox>
-                </StackPanel>
+            <!-- The Error Message (only visible if there are errors -->
+            <StackPanel Grid.Row="1" Orientation="Vertical" >
+                <Label HorizontalAlignment="Center" 
+                       Content="{Binding InvalidCharErrorMessage}" 
+                   Visibility="{Binding InvalidCharFound}"/>
+                <Label HorizontalAlignment="Center" 
+                       Content="{Binding MismatchedBracketsErrorMessage}" 
+                   Visibility="{Binding MismatchedBracketsFound}"/>
 
-                <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                    <Label Content="Result :   " FontSize="20"/>
-                    <Label Content="{Binding Result}" FontSize="20"/>
-                </StackPanel>
+                <!--, Converter=local:BoolToVisibilityConverter-->
+                
+                
+                <!--<Label HorizontalAlignment="Center" 
+                       Content="{Binding InvalidCharErrorMessage}" 
+                   Visibility="{Binding InvalidCharFound, Converter={StaticResource BoolToVisibility}}"/>
+                <Label HorizontalAlignment="Center" 
+                       Content="{Binding MismatchedBracketsErrorMessage}" 
+                   Visibility="{Binding MismatchedBracketsFound}"/>-->
 
-                <Button Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                FontSize="20"
+            </StackPanel>
+
+            
+
+            <!-- The Result of the equation -->
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+
+                <!-- The Header for the result -->
+                <Label Content="Result :   " FontSize="20"/>
+
+                <!-- The Calculated Result of the Equation -->
+                <Label Content="{Binding Result}" FontSize="20"/>
+
+            </StackPanel>
+
+            <!-- Solve Equation Button -->
+            <Button Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                FontSize="20" Margin="0,0,0,20"
                 Command="{ Binding SolveEquationButtonPressedCommand}" Content="SolveTextboxEquation" />
 
-              
-
-
-            </Grid>
+            <!-- Closing Tag: The Equation Entry and Solution Grid -->
+        </Grid>
+        <!-- Closing Tag: The Main Grid -->
     </Grid>
-   
-
-    <!--<local:MainView></local:MainView>-->
 
 </Window>

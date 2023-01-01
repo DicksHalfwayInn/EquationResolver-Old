@@ -20,11 +20,26 @@ namespace EquationResolver
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MainWindowViewModel vm;
         public MainWindow()
         {
             InitializeComponent();
 
-            DataContext = new MainWindowViewModel();
+            vm = new MainWindowViewModel();
+
+            DataContext= vm;
+        }
+
+        private void EquationEntry_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is TextBox)
+            {
+                var textBox = sender as TextBox;
+
+                var s = textBox.Text;
+
+                vm.TextChanged(s);
+            }
         }
     }
 }
