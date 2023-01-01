@@ -29,7 +29,7 @@ namespace EquationResolver
         /// </summary>
         private string? trimmedAndDeSpacedOriginalString;
 
-        private bool firstPass = true;
+      
 
         private int calculationCounter = 0;
 
@@ -171,15 +171,10 @@ namespace EquationResolver
 
         public void TextChanged(string s)
         {
-            if (firstPass)
-            {
-                firstPass = false;
-            }
-            else
-            {
+            
                 var t = VerifyAllCharsInStringAreValidEquationCharacters(s);
                 CheckForMismatchedBrackets(s);
-            }
+            
    
 
             Result = double.NaN;
@@ -452,7 +447,7 @@ namespace EquationResolver
 
                         calculationCounter++;
 
-                        Calculations.Add(string.Format("EQ # {4}: {0} {1} {2} = {3}", firstNumberString,(char)o, secondNumberString, solution.ToString(), calculationCounter));
+                        Calculations.Add(string.Format("EQ # {4}:    {0}  {1}  {2}  =  {3}", firstNumberString,(char)o, secondNumberString, solution.ToString(), calculationCounter));
 
                         
                         // Grab the first half of the string before the equation being solved

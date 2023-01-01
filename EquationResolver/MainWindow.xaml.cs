@@ -21,6 +21,8 @@ namespace EquationResolver
     public partial class MainWindow : Window
     {
         private MainWindowViewModel vm;
+
+        private bool firstPass = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -32,14 +34,19 @@ namespace EquationResolver
 
         private void EquationEntry_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (sender is TextBox)
+            if (!firstPass)
             {
-                var textBox = sender as TextBox;
+                if (sender is TextBox)
+                {
+                    var textBox = sender as TextBox;
 
-                var s = textBox.Text;
+                    var s = textBox.Text;
 
-                vm.TextChanged(s);
+                    vm.TextChanged(s);
+                }
             }
+            else firstPass = false;
+            
         }
     }
 }

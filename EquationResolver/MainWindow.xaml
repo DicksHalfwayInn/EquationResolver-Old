@@ -23,9 +23,24 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ListView Grid.Column="0" 
+        <!-- Left half of the view showing the Calculations in order of them happening -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- The Column Header-->
+            <Label Grid.Row="0" HorizontalAlignment="Center"
+                   Margin="0,5,0,0" FontSize="20"
+                   Content="Calculations in Order of Operation" />
+            
+            <!-- The Collection of Equations in Order of Operation -->
+            <ListView Grid.Row="1" Margin="20,20,20,20"
                   ItemsSource="{Binding Calculations}"
                   FontSize="15"/>
+        </Grid>
+      
 
         <!-- The Equation Entry and Solution Grid -->
         <Grid Grid.Column="1" Grid.ColumnSpan="2">
@@ -52,25 +67,23 @@
                      HorizontalContentAlignment="Center"
                      VerticalContentAlignment="Center"
                      TextChanged="EquationEntry_TextChanged">
-
-
-
                 </TextBox>
-
             </StackPanel>
 
-            <!-- The Error Message (only visible if there are errors -->
+            <!-- The Error Message (only visible if there are errors TODO:  This doesn't work -->
             <StackPanel Grid.Row="1" Orientation="Vertical" >
+                
+                <!-- Error Message for Invalid Characters in the Textbox -->
                 <Label HorizontalAlignment="Center" 
                        Content="{Binding InvalidCharErrorMessage}" 
                    Visibility="{Binding InvalidCharFound}"/>
+                
+                <!-- Error Message for Opening/Closing Brackets not matching up -->
                 <Label HorizontalAlignment="Center" 
                        Content="{Binding MismatchedBracketsErrorMessage}" 
                    Visibility="{Binding MismatchedBracketsFound}"/>
 
                 <!--, Converter=local:BoolToVisibilityConverter-->
-
-
                 <!--<Label HorizontalAlignment="Center" 
                        Content="{Binding InvalidCharErrorMessage}" 
                    Visibility="{Binding InvalidCharFound, Converter={StaticResource BoolToVisibility}}"/>
@@ -79,8 +92,6 @@
                    Visibility="{Binding MismatchedBracketsFound}"/>-->
 
             </StackPanel>
-
-
 
             <!-- The Result of the equation -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
