@@ -29,8 +29,9 @@ namespace EquationResolver
         /// </summary>
         private string? trimmedAndDeSpacedOriginalString;
 
-      
-
+        /// <summary>
+        ///      The counter for the number of Calculations that have been added to the Calculations Collection
+        /// </summary>
         private int calculationCounter = 0;
 
         #endregion EndRegion-Private Members
@@ -57,6 +58,23 @@ namespace EquationResolver
         #endregion End Region: Full Property : OriginalString
 
         /// <summary>
+        ///      Flag indicating if the equation has invalid chars in it
+        /// </summary>
+        ///         //[ObservableProperty] private bool invalidCharFound = true;
+        #region Full Property : InvalidCharFound
+        private bool invalidCharFound = false;
+
+        public bool InvalidCharFound
+        {
+            get => invalidCharFound;
+            set
+            {
+                invalidCharFound = value;
+            }
+        }
+        #endregion End Region: Full Property : InvalidCharFound
+
+        /// <summary>
         ///      The result of the equation that is bound to the view's Result
         /// </summary>
         [ObservableProperty] private double result = double.NaN;
@@ -72,27 +90,10 @@ namespace EquationResolver
         /// </summary>
         [ObservableProperty] private string mismatchedBracketsErrorMessage = "Open/Close Brackets Mismatched";
 
-        [ObservableProperty] private ObservableCollection<string> calculations = new ObservableCollection<string>();
-
         /// <summary>
-        ///      Flag indicating if the equation has invalid chars in it
+        ///      The collection of all the equations performed to create the result in order of operation
         /// </summary>
-        private bool invalidCharFound = false;
-
-        public bool InvalidCharFound
-        {
-            get=> invalidCharFound;
-            set
-            {
-                invalidCharFound = value;
-            }
-        }
-
-
-
-        //[ObservableProperty] private bool invalidCharFound = true;
-
-
+        [ObservableProperty] private ObservableCollection<string> calculations = new ObservableCollection<string>();
 
         /// <summary>
         ///      Flag indicating if there are not an equal number of opening and closing brackets
@@ -101,83 +102,41 @@ namespace EquationResolver
 
         #endregion EndRegion:  Observable Public Properties
 
-
-
-
-
-
-
-
-
+        #region Private helper methods
         /// <summary>
-        ///      Button Command:  Runs when the Solve Equation button is pressed
+        ///      Helper method to check for mismatched brackets
         /// </summary>
-        [RelayCommand]
-        public void SolveEquationButtonPressed()
-        {
-
-            // Remove all the spaces from the OriginalString
-            trimmedAndDeSpacedOriginalString = OriginalString.Replace(" ", "");
-
-            // Fix the minuses in the string
-            trimmedAndDeSpacedOriginalString = FixForMinus(trimmedAndDeSpacedOriginalString);
-
-            // Create the list of ascii values for the string
-            ASCIIvalues = GetASCIIvalues(trimmedAndDeSpacedOriginalString);
-
-            // Check to see if any of the characters don't belong in an equation
-            var allCharsAreValid = VerifyAllCharsInStringAreValidEquationCharacters(trimmedAndDeSpacedOriginalString);
-
-            
-
-            if (!allCharsAreValid) return;
-
-            if (MismatchedBracketsFound) return;
-
-
-            // Call the EquationStringResolver method
-            var equationResult = EquationStringResolver(trimmedAndDeSpacedOriginalString);
-
-            Result = Convert.ToDouble(equationResult);
-
-        }
-
+        /// <param name="s">The string to check</param>
         private void CheckForMismatchedBrackets(string s)
         {
+            // Declare a counter for opening and closing brackets
             int bracketsUnmatched = 0;
 
+            // Iterate through the passed in string counting how many opening and closing brackets 
+            //      we find in the string.  We need to match up the current opening bracket with
+            //      its corresponding closing bracket
             foreach (var c in s)
             {
+                // If the char being looked at is an opening bracket... increment the bracket counter
                 if ((int)c == 40) bracketsUnmatched++;
+
+                // If the char being looked at is a closing bracket... decrement the bracket counter
                 if ((int)c == 41) bracketsUnmatched--;
             }
 
+            //  If after traversing the entire string we have matching brackets
             if (bracketsUnmatched == 0)
             {
+                // Set the Flag for Mismatched Brackets to false;
                 MismatchedBracketsFound = false;
+                // Quit the method
                 return;
             }
             else
             {
+                // If we don't have corresponding opening and closing brackets, Set the Error flag to true
                 MismatchedBracketsFound = true;
             }
-        }
-
-        // Default Constructor
-        public MainWindowViewModel()
-        {
-
-        }
-
-        public void TextChanged(string s)
-        {
-            
-                var t = VerifyAllCharsInStringAreValidEquationCharacters(s);
-                CheckForMismatchedBrackets(s);
-            
-   
-
-            Result = double.NaN;
         }
 
         /// <summary>
@@ -229,27 +188,33 @@ namespace EquationResolver
         }
 
         /// <summary>
-        ///      Check to see if any characters are not numbers or operators, 
+        ///      Check to see if any characters are not Numbers, Operators or Brackets 
         /// </summary>
         /// <param name="bytesToCheck"></param>
         /// <returns></returns>
         private bool VerifyAllCharsInStringAreValidEquationCharacters(string equationString)
         {
+            // Flag for if a Bad Char is found in the passed in string
             var foundBadChar = false;
 
+            // Remove all the trim and empty spaces from the passed in string
             var trimmedAndDeSpacedstring = equationString.Replace(" ", "");
-            //
+
+
+            // Convert the refactored string to an Array of Byte
             var bytesToCheck = GetASCIIvalues(trimmedAndDeSpacedstring);
 
             // Iterate through the bytes in the string to check to see if they belong
             foreach (var b in bytesToCheck)
             {
-
+                // TODO:  THis is only here so I can pause and see the char value of the byte
+                //          Remove this when we are done
                 var x = (char)b;
+
                 // If you find one that doesn't belong, quit and return false
                 if (!((b >= 40 && b <= 43) || (b >= 45 && b <= 57) || (b == 94)))
                 {
-                    //invalidCharErrorMessage = "Invalid Characters in Equation";
+                    // If the character didn't match a legal one... set the fail flag to true
                     foundBadChar = true;
 
                 }
@@ -259,14 +224,14 @@ namespace EquationResolver
                 //{
                 //    ErrorMessage = "Invalid Characters in Equation";
                 //    errorFound = true;
-                    
+
                 //}
 
             }
             if (foundBadChar)
             {
                 InvalidCharFound = true;
-                
+
                 return false;
             }
             else
@@ -276,7 +241,222 @@ namespace EquationResolver
             }
         }
 
+        /// <summary>
+        ///      When an operator is found, find the number before the operator
+        /// </summary>
+        /// <param name="stringRecieved">The equation passed in</param>
+        /// <param name="index">The index point of the operator</param>
+        /// <returns></returns>
+        private string FindNumberBeforeOperatorAsString(string stringRecieved, int index)
+        {
+            // The number before the operator
+            var firstHalfOfString = stringRecieved.Substring(0, index);
 
+            // Set a counter equal to the index of the operator
+            var i = index;
+
+            // Iterate backwards through the passed in string
+            foreach (var c in stringRecieved.Substring(0, index).Reverse())
+            {
+                // If a character is not a number then...
+                if (!IsANumber(c))
+                {
+                    // Grab the number before the operand as a string
+                    var numberBeforeOperand = stringRecieved.Substring(i, index - i + 1);
+
+                    // Return the value
+                    return numberBeforeOperand;
+                }
+                // If the character is a number then decrement the counter and look at the character 
+                //      before this one
+                else i--;
+            }
+
+            var result = stringRecieved.Substring(0, i);
+            // TODO:  ONe of these is correct... figure it out
+
+            //var result = stringRecieved.Substring(0, index);
+
+            // Return the number as a string that is before the operand
+            return result;
+
+        }
+
+        /// <summary>
+        ///      When an operator is found, find the number after the operator
+        /// </summary>
+        /// <param name="stringRecieved">The equation passed in</param>
+        /// <param name="index">The index point of the operator</param>
+        /// <returns></returns>
+        private string FindNumberAfterOperatorAsString(string stringRecieved, int index)
+        {
+            // Start off by creating a secondHalfOfString that is the entire rest of the string received
+            var secondHalfOfString = stringRecieved.Substring(index);
+
+            // Set the counter at the point where the operator was found
+            var i = index;
+
+            // Iterate through all the characters that were found after the operator
+            foreach (var c in secondHalfOfString)
+            {
+                // If the character is not a number...
+                if (!IsANumber(c))
+                {
+                    // Grab the number after the operator
+                    var numberAfterTheOperator = stringRecieved.Substring(i, index - i + 1);
+
+                    // Return the Number after the Operator
+                    return numberAfterTheOperator;
+                }
+                // If we haven't found a character that isn't a number... decrement the counter
+                i--;
+            }
+
+            // Set the result for the Second Half of String to the found number
+            var result = secondHalfOfString;
+
+            // Return the result
+            return result;
+        }
+
+        /// <summary>
+        ///      Check to see if a passed in character is a valid number character ( 0-9, .  , - )
+        /// </summary>
+        /// <param name="charAscii"></param>
+        /// <returns></returns>
+        private bool IsANumber(int charAscii)
+        {
+
+            // TODO: I changed this to include the negative (minus) character... this might break it
+            if (((charAscii < 48) || (charAscii > 57)) && charAscii != 46 && charAscii != 45)
+            {
+                // If we didn't find a number character return false
+                return false;
+            }
+
+            // If the passed in character is a valid number character, return a valid response
+            else return true;
+        }
+
+        /// <summary>
+        ///      Finds the corresponding closing bracket for the open bracket 
+        /// </summary>
+        /// <param name="openBracketPosition">The position in the string where the open bracket was found</param>
+        /// <param name="stringToCutBracketsOutOf">The string to cut out once the corresponding closing bracket is found</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        private string CutOutTextInsideOfBrackets(int openBracketPosition, string stringToCutBracketsOutOf)
+        {
+            // Declare a property to keep track of the resultant string
+            string result = null;
+
+            // Counter property to keep track of the number of bracket openings and closings
+            int numberOfOpenBrackets = 0;
+
+            // Get an arrat of bytes to represent the passed in string
+            var bytes = GetASCIIvalues(stringToCutBracketsOutOf);
+
+            // Iterate through the characters after the found Open Bracket to the end of the string
+            for (int i = openBracketPosition + 1; i < stringToCutBracketsOutOf.Length; i++)
+            {
+                // If we find another Open Bracket increment the number of open brackets found
+                if (bytes[i] == 40) numberOfOpenBrackets++;
+
+                // If we find a Closing Bracket...
+                if (bytes[i] == 41)
+                {
+                    // If the Closing Bracket we found is the Corresponding Closing Bracket for the Open Bracket...
+                    if (numberOfOpenBrackets == 0)
+                    {
+                        // Change the Result to be equal to the Equation's second number after the operator
+                        result = stringToCutBracketsOutOf.Substring(openBracketPosition + 1, i - openBracketPosition - 1);
+                    }
+
+                    // Decrement the number of Open Brackets
+                    numberOfOpenBrackets--;
+                }
+
+                // If we have a result then obviously we had matching brackets, therefore stop the loop
+                if (result != null) break;
+            }
+
+            // If we have found a number after the operand, return it
+            if (result != null) { return result; }
+
+            // TODO: THis will crash, but it is the final check if result is nothing
+            else
+            {
+                throw new Exception();
+                return string.Empty;
+            }
+        }
+
+        #endregion EndRegion: Private helper methods
+
+
+        #region Command Methods
+
+
+        /// <summary>
+        ///      Button Command:  Runs when the Solve Equation button is pressed
+        /// </summary>
+        [RelayCommand]
+        public void SolveEquationButtonPressed()
+        {
+            // Remove all the spaces from the OriginalString
+            trimmedAndDeSpacedOriginalString = OriginalString.Replace(" ", "");
+
+            // Fix the minuses in the string
+            trimmedAndDeSpacedOriginalString = FixForMinus(trimmedAndDeSpacedOriginalString);
+
+            // Create the list of ascii values for the string
+            ASCIIvalues = GetASCIIvalues(trimmedAndDeSpacedOriginalString);
+
+            // Check to see if any of the characters don't belong in an equation
+            var allCharsAreValid = VerifyAllCharsInStringAreValidEquationCharacters(trimmedAndDeSpacedOriginalString);
+
+            // If not all characters in the textbox are valid equation characters [  0-9, (, ), +, -, *, /, ^  ]
+            //     then quit the equation resolver attempt
+            if (!allCharsAreValid) return;
+
+            // If there are opening brackets and closing brackets that don't match up
+            //     then quit the equation resolver attempt
+            if (MismatchedBracketsFound) return;
+
+            // Call the EquationStringResolver method
+            var equationResult = EquationStringResolver(trimmedAndDeSpacedOriginalString);
+
+            // Change the Equation Result back to a double and update the view with the result of the entire equation
+            Result = Convert.ToDouble(equationResult);
+
+        }
+        #endregion EndRegion: Command Methods
+
+        #region Public Methods available to the view
+
+        /// <summary>
+        ///      Called from the View's code-behind for the Equation Entry Textbox's TextChanged event
+        ///           Also it resets the previous Result back to NaN-Not a Number
+        ///           TODO:  This is not doing anything right now... it was to show the errors as the 
+        ///                  Text was changing, but the binding doesn't work... fix this
+        /// </summary>
+        /// <param name="s"></param>
+        public void VerifyTextChangedDoesntCreateAnError(string s)
+        {
+            // Method that changes the flag to display the error... TODO: doesn't work
+            _ = VerifyAllCharsInStringAreValidEquationCharacters(s);
+
+            // Check to see if we have the correct number of opening and closing brackets or else
+            //      change the error state to visible in the view
+            CheckForMismatchedBrackets(s);
+
+            // If the text has changed then we should reset the Result displayed on the view
+            Result = double.NaN;
+        }
+
+        #endregion EndRegion: Command Methods
+
+        #region Private methods to Solve the Equation
 
         /// <summary>
         ///      The main resolver method start
@@ -286,7 +466,7 @@ namespace EquationResolver
         /// <exception cref="Exception"></exception>
         private string EquationStringResolver(string stringToResolve)
         {
-            
+
             // Convert the string into an array of bytes
             var bytes = GetASCIIvalues(stringToResolve);
 
@@ -319,29 +499,24 @@ namespace EquationResolver
                     // Recursively throw the cut out string back into this method to solve further
                     var solution = EquationStringResolver(cutOutTextFromBrackets);
 
-                    // After the Recursive method has exited...
+                    // After the Recursive method has exited... Create a new Resultant sting
                     resultantString = firstHalfOfString + solution.ToString() + secondHalfOfString;
 
+                    // Adjust the counter for the change in the length of the string between
+                    //     the passed in string and the new resultant string
                     i = firstHalfOfString.Length + solution.ToString().Length - 1;
 
+                    // Adjust the length property of the while loop to adjust for the new resulant string
                     l = resultantString.Length;
                 }
+                // Increment the pointer counter
                 i++;
             }
 
-            //if (resultantString.Length == 0)
-            //{
-            //    var answer = SolveSimlifiedEquation(stringToResolve);
-
-            //}
-            //else
-            //{
-            //    throw new Exception();
-            //}
-
-
+            // Solve the equation that occurs in between the brackets or after the brackets have been resolved
             var solvedEquation = SolveSimlifiedEquation(resultantString);
 
+            // Return the Solved Equation
             return solvedEquation;
         }
 
@@ -428,8 +603,6 @@ namespace EquationResolver
                     // If we have already found an operator and now we have found another... solve the equation
                     else if (operatorFound)
                     {
-                        //  Sample Equation:  (1 + 1^2 *3) * 99 - 003
-
                         // Declare a variable to keep track of the math solution
                         double solution = 0.0;
 
@@ -445,15 +618,24 @@ namespace EquationResolver
                         // If the operator is Addition
                         if (o == 43) solution = Convert.ToDouble(firstNumberString) + Convert.ToDouble(secondNumberString);
 
+                        // If we are dealing with addition of a second number that is negative... convert the operator to be
+                        //      a minus and show it subtracting a positive instead of adding a negative
+                        var oper = o;
+                        var secondNumberAsDouble = Convert.ToDouble(secondNumberString);
+                        var convertedSecondNumberString = (secondNumberAsDouble < 0) ? (secondNumberAsDouble * -1).ToString() : secondNumberString;
+                        if (convertedSecondNumberString != secondNumberString) oper = 45;
+
+                        // Increment the counter for the number of calculations that have already been added to the listview
                         calculationCounter++;
 
-                        Calculations.Add(string.Format("EQ # {4}:    {0}  {1}  {2}  =  {3}", firstNumberString,(char)o, secondNumberString, solution.ToString(), calculationCounter));
+                        // Add the equation string to the observable collection of equations
+                        Calculations.Add(string.Format("EQ # {4}:    {0}  {1}  {2}  =  {3}", firstNumberString, (char)oper, convertedSecondNumberString, solution.ToString(), calculationCounter));
 
-                        
                         // Grab the first half of the string before the equation being solved
                         var firstHalfOfString = stringrecieved.Substring(0, firstNumberPosition);
 
-                        // Grab the second half of the string after the equation being solved
+                        // Grab the second half of the string after the equation being solved if there is nothing after the second
+                        //      number then just grab the last part of the equation being resolved
                         var secondHalfOfString = (i < l) ?
                             stringrecieved.Substring(secondintstrFinalPosition + 1, stringrecieved.Length - (secondintstrFinalPosition + 1)) : "";
 
@@ -492,130 +674,10 @@ namespace EquationResolver
                     // Increment the counter
                     i++;
                 }
-
             }
-
             return stringrecieved;
-
         }
 
-
-
-
-
-
-
-
-        private string FindNumberBeforeOperatorAsString(string stringRecieved, int index)
-        {
-
-
-            var firstHalfOfString = stringRecieved.Substring(0, index);
-
-            var i = index;
-
-            foreach (var c in stringRecieved.Substring(0, index).Reverse())
-            {
-                if (!IsANumber(c))
-                {
-                    var x = stringRecieved.Substring(i, index - i + 1);
-
-                    return x;
-                }
-                i--;
-            }
-
-            var result = stringRecieved.Substring(0, index);
-
-            return result;
-
-        }
-
-
-
-        private string FindNumberAfterOperatorAsString(string stringRecieved, int index)
-        {
-
-
-            var secondHalfOfString = stringRecieved.Substring(index);
-
-            var i = index;
-
-            foreach (var c in secondHalfOfString)
-            {
-                if (!IsANumber(c))
-                {
-                    var x = stringRecieved.Substring(i, index - i + 1);
-
-                    return x;
-                }
-                i--;
-            }
-
-            var result = secondHalfOfString;
-
-            return result;
-
-        }
-
-
-
-
-
-        private int FindEndPositionOfNumberAfterOperator(string stringrecieved, int index)
-        {
-            var i = index;
-
-            foreach (var c in stringrecieved.Substring(index))
-            {
-                if (!IsANumber(c)) return i;
-                i--;
-            }
-            return stringrecieved.Length;
-
-        }
-
-
-
-
-        private bool IsANumber(int charAscii)
-        {
-            if (((charAscii < 48) || (charAscii > 57)) && charAscii != 46) return false;
-            else return true;
-        }
-
-        private string CutOutTextInsideOfBrackets(int openBracketPosition, string stringToCutBracketsOutOf)
-        {
-            string result = null;
-            int numberOfOpenBrackets = 0;
-
-            var bytes = GetASCIIvalues(stringToCutBracketsOutOf);
-
-            for (int i = openBracketPosition + 1; i < stringToCutBracketsOutOf.Length; i++)
-            {
-
-                var cccc = i;
-
-                if (bytes[i] == 40) numberOfOpenBrackets++;
-                if (bytes[i] == 41)
-                {
-                    
-                    if (numberOfOpenBrackets == 0)
-                    {
-                        result = stringToCutBracketsOutOf.Substring(openBracketPosition + 1, i - openBracketPosition - 1);
-                    }
-                    numberOfOpenBrackets--;
-                }
-
-                if (result != null) break;
-            }
-
-            if (result != null) { return result; }
-            else
-            {
-                throw new Exception();
-                return string.Empty;
-            }
-        }
+                #endregion EndRegion:  Private methods to Solve the Equation 
     }
 }
