@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -30,6 +31,8 @@ namespace EquationResolver
 
         private bool firstPass = true;
 
+        private int calculationCounter = 0;
+
         #endregion EndRegion-Private Members
 
 
@@ -47,7 +50,7 @@ namespace EquationResolver
             set
             {
                 if (originalString == value) return;
-                
+
                 SetProperty(ref originalString, value);
             }
         }
@@ -68,6 +71,8 @@ namespace EquationResolver
         ///           re:  Even number of opening and closing brackets
         /// </summary>
         [ObservableProperty] private string mismatchedBracketsErrorMessage = "Open/Close Brackets Mismatched";
+
+        [ObservableProperty] private ObservableCollection<string> calculations = new ObservableCollection<string>();
 
         /// <summary>
         ///      Flag indicating if the equation has invalid chars in it
@@ -311,10 +316,10 @@ namespace EquationResolver
                     var cutOutTextFromBrackets = CutOutTextInsideOfBrackets(i, resultantString);
 
                     // Remember the first part of the string before the opening bracket
-                    var firstHalfOfString = stringToResolve.Substring(0, i);
+                    var firstHalfOfString = resultantString.Substring(0, i);
 
                     // Remember the last part of the string after the corresponding closing bracket...)  
-                    var secondHalfOfString = stringToResolve.Substring(i + (cutOutTextFromBrackets.Length + 2));
+                    var secondHalfOfString = resultantString.Substring(i + (cutOutTextFromBrackets.Length + 2));
 
                     // Recursively throw the cut out string back into this method to solve further
                     var solution = EquationStringResolver(cutOutTextFromBrackets);
@@ -445,6 +450,11 @@ namespace EquationResolver
                         // If the operator is Addition
                         if (o == 43) solution = Convert.ToDouble(firstNumberString) + Convert.ToDouble(secondNumberString);
 
+                        calculationCounter++;
+
+                        Calculations.Add(string.Format("EQ # {4}: {0} {1} {2} = {3}", firstNumberString,(char)o, secondNumberString, solution.ToString(), calculationCounter));
+
+                        
                         // Grab the first half of the string before the equation being solved
                         var firstHalfOfString = stringrecieved.Substring(0, firstNumberPosition);
 

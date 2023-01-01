@@ -16,9 +16,19 @@
 
     <!-- Main Grid -->
     <Grid >
+        <Grid.ColumnDefinitions>
+            <!-- The ListView of the calculations -->
+            <ColumnDefinition Width="*" />
+            <!-- The Equation Entry panel -->
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ListView Grid.Column="0" 
+                  ItemsSource="{Binding Calculations}"
+                  FontSize="15"/>
 
         <!-- The Equation Entry and Solution Grid -->
-        <Grid Grid.Column="0" Grid.ColumnSpan="2">
+        <Grid Grid.Column="1" Grid.ColumnSpan="2">
             <Grid.RowDefinitions>
                 <!-- Row 0: Equation Entry Textbox -->
                 <RowDefinition Height="*" />
@@ -42,9 +52,9 @@
                      HorizontalContentAlignment="Center"
                      VerticalContentAlignment="Center"
                      TextChanged="EquationEntry_TextChanged">
-                   
-                        
-                    
+
+
+
                 </TextBox>
 
             </StackPanel>
@@ -59,8 +69,8 @@
                    Visibility="{Binding MismatchedBracketsFound}"/>
 
                 <!--, Converter=local:BoolToVisibilityConverter-->
-                
-                
+
+
                 <!--<Label HorizontalAlignment="Center" 
                        Content="{Binding InvalidCharErrorMessage}" 
                    Visibility="{Binding InvalidCharFound, Converter={StaticResource BoolToVisibility}}"/>
@@ -70,7 +80,7 @@
 
             </StackPanel>
 
-            
+
 
             <!-- The Result of the equation -->
             <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
